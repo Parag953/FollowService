@@ -1,22 +1,26 @@
 type User {
     id: ID!
     name: String!
-    followInfo: FollowInfo
+    follower: [ID!]!
+    following: [ID!]!
 }
 
-type FollowInfo {
-    follower: [User!]
-    following: [User!]
+type UserResponse {
+    Id: ID!
+    name : String!
 }
 
 type Query {
-    followers(userId: ID!): [User!]
-    following(userId: ID!): [User!]
+    followers(Id : ID!): [UserResponse!]!
+    followings(Id: ID!): [UserResponse!]!
 }
 
+
+
 type Mutation {
-    followUser(myId: ID!, followingId: ID!): Boolean!
-    unfollowUser(myId: ID!, followingId: ID!): Boolean!
+    followUser(myId: ID!, targetId: ID!): Boolean!
+    unfollowUser(myId: ID!, targetId: ID!): Boolean!
+    createUser(name: String!): UserResponse!
 }
 
 type Error {
