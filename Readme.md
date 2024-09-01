@@ -1,6 +1,6 @@
-
 To run the service locally, you need to have the following installed:
 go - preferably 1.18 and above
+To get all dependencies simply run `go mod tidy`
 
 After cloning the service, go to main directory and run the command
  ```go run .```
@@ -10,9 +10,9 @@ There will be link printed in terminal
 
 Click on it and a graphiql interface will open up. You can run the queries and mutations there.
 
-Sample Mutations And Queries
+### **Sample Mutations And Queries**
 
-Creating a User :
+#### Creating a User :
 ```
 mutation{
   createUser(name : "parag"){
@@ -22,7 +22,7 @@ mutation{
 }
 ```
 
-Follow Someone
+#### Follow Someone
 ```
 mutation{
   followUser(myId: "user1", targetId: "user5")
@@ -30,14 +30,14 @@ mutation{
 ```
 if the target user exist and is not already followed it will return true else false with message
 
-UnFollow Someone
+#### UnFollow Someone
 ```
 mutation{
   unfollowUser(myId: "user1", targetId: "user5")
 }
 ```
 
-Get All Followers
+#### Get All Followers
 ```
 query{
   followers(Id : "user1"){
@@ -47,7 +47,7 @@ query{
 }
 ```
 
-Get All Following
+#### Get All Following
 ```
 query{
   followings(Id : "user1"){
