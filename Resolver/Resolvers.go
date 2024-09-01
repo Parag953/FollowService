@@ -1,6 +1,8 @@
-package main
+package Resolver
 
 import (
+	"FollowService/dao"
+	"FollowService/model"
 	"errors"
 	"fmt"
 	"github.com/graph-gophers/graphql-go"
@@ -13,20 +15,20 @@ type args struct {
 
 type RootResolver struct{}
 
-type UserResolver struct{ u *User }
+type UserResolver struct{ u *model.User }
 
-type UserResponseResolver struct{ u *UserResponse }
+type UserResponseResolver struct{ u *model.UserResponse }
 
 func (r *RootResolver) Users() ([]*UserResolver, error) {
 	var userRxs []*UserResolver
-	for _, u := range Users {
+	for _, u := range dao.Users {
 		userRxs = append(userRxs, &UserResolver{u})
 	}
 	return userRxs, nil
 }
 
 func (r *RootResolver) User(args struct{ Id graphql.ID }) (*UserResolver, error) {
-	for _, u := range Users {
+	for _, u := range dao.Users {
 		if u.Id == args.Id {
 			return &UserResolver{u}, nil
 		}
@@ -45,7 +47,7 @@ func (r *RootResolver) Followers(args struct{ Id graphql.ID }) ([]*UserResponseR
 		arg := struct{ Id graphql.ID }{followerId}
 		userResolver, _ := r.User(arg)
 		name := userResolver.u.Name
-		followerRxs = append(followerRxs, &UserResponseResolver{&UserResponse{followerId, name}})
+		followerRxs = append(followerRxs, &UserResponseResolver{&model.UserResponse{followerId, name}})
 	}
 	return followerRxs, nil
 }
@@ -61,7 +63,7 @@ func (r *RootResolver) Followings(args struct{ Id graphql.ID }) ([]*UserResponse
 		arg := struct{ Id graphql.ID }{followingId}
 		userResolver, _ := r.User(arg)
 		name := userResolver.u.Name
-		followingRxs = append(followingRxs, &UserResponseResolver{&UserResponse{followingId, name}})
+		followingRxs = append(followingRxs, &UserResponseResolver{&model.UserResponse{followingId, name}})
 	}
 	return followingRxs, nil
 }
@@ -152,14 +154,14 @@ func (r *RootResolver) UnfollowUser(args args) (bool, error) {
 }
 
 func (r *RootResolver) CreateUser(args struct{ Name string }) (*UserResponseResolver, error) {
-	newUser := &User{
-		Id:         graphql.ID(fmt.Sprintf("user%d", len(Users)+1)),
+	newUser := &model.User{
+		Id:         graphql.ID(fmt.Sprintf("user%d", len(dao.Users)+1)),
 		Name:       args.Name,
 		Followers:  make([]graphql.ID, 0),
 		Followings: make([]graphql.ID, 0),
 	}
-	Users = append(Users, newUser)
-	u := &UserResponse{
+	dao.Users = append(dao.Users, newUser)
+	u := &model.UserResponse{
 		Id:   newUser.Id,
 		Name: newUser.Name,
 	}

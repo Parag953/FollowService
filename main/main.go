@@ -1,8 +1,9 @@
 package main
 
 import (
+	"FollowService/Resolver"
+	"FollowService/dao"
 	"FollowService/handler"
-	"fmt"
 	"github.com/go-chi/chi"
 	gql "github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
@@ -11,43 +12,17 @@ import (
 	"net/http"
 )
 
-var Users []*User
-
-func createRandomUser(id int) *User {
-	return &User{
-		Id:         gql.ID(fmt.Sprintf("user%d", id)),
-		Name:       fmt.Sprintf("User %d", id),
-		Followers:  make([]gql.ID, 0),
-		Followings: make([]gql.ID, 0),
-	}
-}
-
-func addRandomUsers() {
-
-	for i := 1; i <= 5; i++ {
-		Users = append(Users, createRandomUser(i))
-	}
-
-	Users[0].Followers = append(Users[0].Followers, Users[1].Id, Users[2].Id)
-	Users[0].Followings = append(Users[0].Followings, Users[1].Id, Users[3].Id)
-
-	// Print the users to verify
-	for _, user := range Users {
-		fmt.Printf("ID: %s, Name: %s\n", user.Id, user.Name)
-	}
-}
-
 func main() {
-	addRandomUsers()
-	schemaData, err := ioutil.ReadFile("schema.graphql")
+	dao.AddRandomUsers()
+	schemaData, err := ioutil.ReadFile("../config/schema.graphql")
 	if err != nil {
 		log.Fatalf("Failed to read schema file: %v", err)
 	}
 
 	// Parse the schema
-	schema := gql.MustParseSchema(string(schemaData), &RootResolver{})
+	schema := gql.MustParseSchema(string(schemaData), &Resolver.RootResolver{})
 
-	s := Server{Router: chi.NewRouter(), GqlHandler: &handler.GraphiQL{Schema: schema}}
+	s := handler.Server{Router: chi.NewRouter(), GqlHandler: &handler.GraphiQL{Schema: schema}}
 	// Set up the HTTP handler
 	s.Router.Group(func(r chi.Router) {
 		r.Handle("/query", &relay.Handler{Schema: s.GqlHandler.Schema})
