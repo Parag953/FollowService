@@ -12,6 +12,8 @@ Click on it and a graphiql interface will open up. You can run the queries and m
 
 ### **Sample Mutations And Queries**
 
+- I have added 5 Users already with Ids from `user1` to `user5`
+
 #### Creating a User :
 ```
 mutation{
