@@ -1,11 +1,10 @@
-package main
+package handler
 
 import (
-	"FollowService/handler"
 	"github.com/go-chi/chi"
 )
 
 type Server struct {
 	Router     chi.Router
-	GqlHandler *handler.GraphiQL
+	GqlHandler *GraphiQL
 }
