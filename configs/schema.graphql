@@ -15,8 +15,6 @@ type Query {
     followings(Id: ID!): [UserResponse!]!
 }
 
-
-
 type Mutation {
     followUser(myId: ID!, targetId: ID!): Boolean!
     unfollowUser(myId: ID!, targetId: ID!): Boolean!

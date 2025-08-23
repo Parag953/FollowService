@@ -1,18 +1,6 @@
-package handler
+package main
 
-import (
-	"github.com/graph-gophers/graphql-go"
-)
-
-// GraphiQL is an in-browser IDE for exploring GraphiQL APIs.
-// This handler returns GraphiQL when requested.
-//
-// For more information, see https://github.com/graphql/graphiql.
-type GraphiQL struct {
-	Schema *graphql.Schema
-}
-
-var Page = []byte(`
+var page = []byte(`
 <!DOCTYPE html>
 <html>
 	<head>
