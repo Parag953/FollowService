@@ -1,44 +1,44 @@
 package configs
 
 import (
-    "os"
+	"os"
 )
 
 type Config struct {
-    Server   ServerConfig
-    Database DatabaseConfig
+	Server   ServerConfig
+	Database DatabaseConfig
 }
 
 type ServerConfig struct {
-    Port string
+	Port string
 }
 
 type DatabaseConfig struct {
-    Host     string
-    Port     string
-    User     string
+	Host     string
+	Port     string
+	User     string
     Password string
-    DBName   string
+	DBName   string
 }
 
 func Load() *Config {
-return &Config{
-        Server: ServerConfig{
+	return &Config{
+		Server: ServerConfig{
 			Port: getEnv("SERVER_PORT", "8080"),
-        },
-        Database: DatabaseConfig{
-            Host:     getEnv("DB_HOST", "localhost"),
-            Port:     getEnv("DB_PORT", "5432"),
-            User:     getEnv("DB_USER", "user"),
-            Password: getEnv("DB_PASSWORD", "password"),
-            DBName:   getEnv("DB_NAME", "followservice"),
-        },
-    }
+		},
+		Database: DatabaseConfig{
+			Host:     getEnv("DB_HOST", "localhost"),
+			Port:     getEnv("DB_PORT", "5432"),
+			User:     getEnv("DB_USER", "followuser"),
+			Password: getEnv("DB_PASSWORD", "followpass"),
+			DBName:   getEnv("DB_NAME", "followservice"),
+		},
+	}
 }
 
 func getEnv(key, defaultValue string) string {
-    if value := os.Getenv(key); value != "" {
-        return value
-    }
-    return defaultValue
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
 }

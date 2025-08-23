@@ -16,13 +16,13 @@ func NewFollowRepository(db *sql.DB) repository.FollowRepository {
 }
 
 func (r *followRepository) Follow(ctx context.Context, followerID, followeeID string) error {
-	query := `INSERT INTO follows (follower_id, followee_id) VALUES (?, ?)`
+	query := `INSERT INTO follows (follower_id, followee_id) VALUES ($1, $2)`
 	_, err := r.db.ExecContext(ctx, query, followerID, followeeID)
 	return err
 }
 
 func (r *followRepository) Unfollow(ctx context.Context, followerID, followeeID string) error {
-	query := `DELETE FROM follows WHERE follower_id = ? AND followee_id = ?`
+	query := `DELETE FROM follows WHERE follower_id = $1 AND followee_id = $2`
 	_, err := r.db.ExecContext(ctx, query, followerID, followeeID)
 	return err
 }
@@ -32,7 +32,7 @@ func (r *followRepository) GetFollowers(ctx context.Context, userID string) ([]*
 		SELECT u.id, u.name, u.created_at, u.updated_at 
 		FROM users u 
 		INNER JOIN follows f ON u.id = f.follower_id 
-		WHERE f.followee_id = ?`
+		WHERE f.followee_id = $1`
 
 	rows, err := r.db.QueryContext(ctx, query, userID)
 	if err != nil {
@@ -56,7 +56,7 @@ func (r *followRepository) GetFollowing(ctx context.Context, userID string) ([]*
 		SELECT u.id, u.name, u.created_at, u.updated_at 
 		FROM users u 
 		INNER JOIN follows f ON u.id = f.followee_id 
-		WHERE f.follower_id = ?`
+		WHERE f.follower_id = $1`
 
 	rows, err := r.db.QueryContext(ctx, query, userID)
 	if err != nil {
@@ -76,7 +76,7 @@ func (r *followRepository) GetFollowing(ctx context.Context, userID string) ([]*
 }
 
 func (r *followRepository) IsFollowing(ctx context.Context, followerID, followeeID string) (bool, error) {
-	query := `SELECT COUNT(*) FROM follows WHERE follower_id = ? AND followee_id = ?`
+	query := `SELECT COUNT(*) FROM follows WHERE follower_id = $1 AND followee_id = $2`
 	var count int
 	err := r.db.QueryRowContext(ctx, query, followerID, followeeID).Scan(&count)
 	if err != nil {

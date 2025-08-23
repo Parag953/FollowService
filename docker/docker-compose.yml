@@ -4,13 +4,35 @@ services:
     image: postgres:15
     environment:
       POSTGRES_DB: followservice
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: followuser
+      POSTGRES_PASSWORD: followpass
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./migrations:/docker-entrypoint-initdb.d
+      - ../migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U followuser -d followservice"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  app:
+    build: 
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: followuser
+      DB_PASSWORD: followpass
+      DB_NAME: followservice
+      SERVER_PORT: 8080
 
 volumes:
   postgres_data:

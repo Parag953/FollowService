@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -14,6 +15,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	gql "github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
+	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -55,16 +57,40 @@ func main() {
 }
 
 func initDatabase(dbConfig configs.DatabaseConfig) (*sql.DB, error) {
-	// Use file-based SQLite for persistence and external access
+	// Check if we should use PostgreSQL or SQLite
+	// Use PostgreSQL if any of these conditions are met:
+	// 1. DB_HOST is explicitly set (even if localhost)
+	// 2. DB_USER is set (indicates intention to use PostgreSQL)
+	// 3. DB_PASSWORD is set
+	if dbConfig.User != "" || dbConfig.Password != "" || os.Getenv("USE_POSTGRES") == "true" {
+		// Use PostgreSQL for production/Docker
+		dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+			dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.DBName)
+		
+		db, err := sql.Open("postgres", dsn)
+		if err != nil {
+			return nil, fmt.Errorf("failed to open postgres connection: %w", err)
+		}
+		
+		// Test the connection
+		if err := db.Ping(); err != nil {
+			return nil, fmt.Errorf("failed to ping postgres: %w", err)
+		}
+		
+		log.Printf("Connected to PostgreSQL at %s:%s", dbConfig.Host, dbConfig.Port)
+		return db, nil
+	}
+	
+	// Use SQLite for local development
 	os.MkdirAll("data", 0755)
 	db, err := sql.Open("sqlite3", "data/followservice.db")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open sqlite connection: %w", err)
 	}
 
 	// Run migrations (create tables)
 	if err := runMigrations(db); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to run migrations: %w", err)
 	}
 
 	// Seed initial data
@@ -72,6 +98,7 @@ func initDatabase(dbConfig configs.DatabaseConfig) (*sql.DB, error) {
 		log.Printf("Warning: Failed to seed data: %v", err)
 	}
 
+	log.Println("Connected to SQLite database")
 	return db, nil
 }
 

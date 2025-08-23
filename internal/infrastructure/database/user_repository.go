@@ -16,13 +16,13 @@ func NewUserRepository(db *sql.DB) repository.UserRepository {
 }
 
 func (r *userRepository) Create(ctx context.Context, user *entity.User) error {
-	query := `INSERT INTO users (id, name, created_at, updated_at) VALUES (?, ?, datetime('now'), datetime('now'))`
+	query := `INSERT INTO users (id, name, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())`
 	_, err := r.db.ExecContext(ctx, query, user.ID, user.Name)
 	return err
 }
 
 func (r *userRepository) GetByID(ctx context.Context, id string) (*entity.User, error) {
-	query := `SELECT id, name, created_at, updated_at FROM users WHERE id = ?`
+	query := `SELECT id, name, created_at, updated_at FROM users WHERE id = $1`
 	user := &entity.User{}
 	err := r.db.QueryRowContext(ctx, query, id).Scan(&user.ID, &user.Name, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
@@ -50,13 +50,13 @@ func (r *userRepository) GetAll(ctx context.Context) ([]*entity.User, error) {
 }
 
 func (r *userRepository) Update(ctx context.Context, user *entity.User) error {
-	query := `UPDATE users SET name = ?, updated_at = datetime('now') WHERE id = ?`
+	query := `UPDATE users SET name = $1, updated_at = NOW() WHERE id = $2`
 	_, err := r.db.ExecContext(ctx, query, user.Name, user.ID)
 	return err
 }
 
 func (r *userRepository) Delete(ctx context.Context, id string) error {
-	query := `DELETE FROM users WHERE id = ?`
+	query := `DELETE FROM users WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err
 }
